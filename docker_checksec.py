@@ -7,6 +7,7 @@ def main():
         from_checker(filedecs)
         user_checker(filedecs)
         secret_env_checker(filedecs)
+        add_checker(filedecs)
         f.close()
 
 def from_checker(filename):
@@ -51,6 +52,13 @@ def secret_env_checker(filename):
             print('[!] Probable secret found: ', i)
     else:
         print('[SECURE] Dockerfile is safe for API secrets')
+
+def add_checker(filename):
+    pattern_add = r'ADD+\s'
+    if re.findall(pattern_add, filename):
+        print(('[WARN] [UNSECURE] CIS-DI-0009 - Use COPY instruction instead of ADD instruction in the Dockerfile'))
+    else:
+        print('[SECURE] Dockerfile uses COPY instead of ADD')
 
 
 
