@@ -1,15 +1,6 @@
 import re
 import argparse
 
-def main():
-    with open(args.file, 'r') as f:
-        filedecs = f.read()
-        from_checker(filedecs)
-        user_checker(filedecs)
-        secret_env_checker(filedecs)
-        add_checker(filedecs)
-        f.close()
-
 def from_checker(filename):
     pattern = r'^FROM+(.+?):((?!latest).+)'
     if re.findall(pattern, filename):
@@ -36,7 +27,7 @@ def user_checker(filename):
         flag_rootexec = 1
     
     if flag_useradd != 0 or flag_addgroup != 0:
-        print ('[SECURE] Dockerfile contains useradd and addgroup to create a user for a container')
+        print ('[SECURE] Dockerfile contains useradd and addgroup to create a user for a container.')
     else: 
         print('[FATAL] [UNSECURE] CIS-DI-0001 - Create a user for the container. It is a good practice to run the container as a non-root user, if possible.')
     
@@ -47,20 +38,27 @@ def secret_env_checker(filename):
     pattern_useradd = r'[a-zA-Z0-9]{16,128}'
     secret_list = re.findall(pattern_useradd, filename)
     if len(secret_list) != 0:
-        print('[WARN] [UNSECURE] CIS-DI-0010 - Detected some weird 16-128 length strings, possibility of API key exposing. Do not store secrets in Dockerfiles')
+        print('[WARN] [UNSECURE] CIS-DI-0010 - Detected some weird 16-128 length strings, possibility of API key exposing. Do not store secrets in Dockerfiles.')
         for i in secret_list:
             print('[!] Probable secret found: ', i)
     else:
-        print('[SECURE] Dockerfile is safe for API secrets')
+        print('[SECURE] Dockerfile is safe for API secrets.')
 
 def add_checker(filename):
     pattern_add = r'ADD+\s'
     if re.findall(pattern_add, filename):
-        print(('[WARN] [UNSECURE] CIS-DI-0009 - Use COPY instruction instead of ADD instruction in the Dockerfile'))
+        print(('[WARN] [UNSECURE] CIS-DI-0009 - Use COPY instruction instead of ADD instruction in the Dockerfile.'))
     else:
-        print('[SECURE] Dockerfile uses COPY instead of ADD')
+        print('[SECURE] Dockerfile uses COPY instead of ADD.')
 
-
+def main():
+    with open(args.file, 'r') as f:
+        filedecs = f.read()
+        from_checker(filedecs)
+        user_checker(filedecs)
+        secret_env_checker(filedecs)
+        add_checker(filedecs)
+        f.close()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Dockerfile checksec python script')
